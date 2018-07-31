@@ -1,0 +1,229 @@
+{% extends 'base.html'%} {% block content %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Tambah Data Wisata</h1>
+                </div>
+                <!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item">
+                            <a href="{{url_for('wisata_blueprint.list_wisata')}}">Data Wisata</a>
+                        </li>
+                        <li class="breadcrumb-item active">Tambah Data Wisata</li>
+                    </ol>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group" id="pac-container" style="width: 350px;height: 100px;padding-top: 20px;">
+                            <input class="form-control" id="pac-input" type="text" placeholder="Cari Lokasi Manual di sini...!!">
+                        </div>
+                        <div id="map" style="width: 100%;height:450px">
+
+                        </div>
+                        <span class="text-dark">
+                            *Klik pada peta untuk memilih lokasi dari peta...!
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form role="form" method="POST">
+            {{form_wisata.csrf_token()}}
+            <div class="row">
+
+                <div class="col-6">
+                    <div class="card">
+                        <div class="card-header clearfix">
+                            <h3 class="card-title">
+                                Data Wisata
+                            </h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="form-group">
+                                {{form_wisata.name.label}} {{form_wisata.name()}}
+                            </div>
+                            <div class="form-group">
+                                {{form_wisata.desc.label}} {{form_wisata.desc()}}
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header clearfix">
+                            <h3 class="card-title">
+                                Data Pengurus Wisata
+                            </h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body row">
+                            <div class="form-group col-6">
+                                {{form_admin.admin_name.label}} {{form_admin.admin_name()}}
+                            </div>
+                            <div class="form-group col-6">
+                                {{form_admin.contact.label}} {{form_admin.contact()}}
+                            </div>
+                            <div class="form-group col-6">
+                                {{form_admin.first_name.label}} {{form_admin.first_name()}}
+                            </div>
+                            <div class="form-group col-6">
+                                {{form_admin.last_name.label}} {{form_admin.last_name()}}
+                            </div>
+                            <div class="form-group col-12">
+                                {{form_admin.address_admin.label}} {{form_admin.address_admin()}}
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+                <div class="col-6">
+                    <div class="card">
+                        <div class="card-header clearfix">
+                            <h3 class="card-title">
+                                Data Lokasi Wisata
+                            </h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body row">
+                            <div class="form-group col-6">
+                                {{form_location.village.label}} {{form_location.village()}}
+                            </div>
+                            <div class="form-group col-6">
+                                {{form_location.district.label}} {{form_location.district()}}
+                            </div>
+                            <div class="form-group col-6">
+                                {{form_location.lat.label}} {{form_location.lat()}}
+                            </div>
+                            <div class="form-group col-6">
+                                {{form_location.lng.label}} {{form_location.lng()}}
+                            </div>
+                            <div class="form-group col-12">
+                                {{form_location.address_loc.label}} {{form_location.address_loc()}}
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-footer">
+                            <a class="btn btn-warning" href="{{url_for('wisata_blueprint.list_wisata')}}">
+                                <i class="fa fa-ban"></i> Batal
+                            </a>
+                            <button class="btn btn-primary">
+                                <i class="fa fa-save"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %} {% block page_script %}
+<script>
+    var map, marker;
+    var lombok_utara = {
+        lat: -8.339970,
+        lng: 116.252767
+    }
+    var latComp = document.getElementById('lat');
+    var lngComp = document.getElementById('lng');
+    var addressComp = document.getElementById('address_loc');
+    var villageComp = document.getElementById('village');
+    var districtComp = document.getElementById('district');
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: lombok_utara,
+            zoom: 12,
+            mapTypeId: 'satellite',
+            heading: 90,
+            tilt: 45
+        });
+        map.addListener('click', function (e) {
+            placeMarkerAndPanTo(e.latLng, map);
+        });
+        var input = document.getElementById('pac-input');
+        var container = document.getElementById('pac-container')
+
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(container);
+
+        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        // Bind the map's bounds (viewport) property to the autocomplete object,
+        // so that the autocomplete requests use the current map bounds for the
+        // bounds option in the request.
+        autocomplete.bindTo('bounds', map);
+
+        autocomplete.addListener('place_changed', function () {
+            // infowindow.close();
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                window.alert("No details available for input: '" + place.name + "'");
+                return;
+            }
+
+            // If the place has a geometry, then present it on a map.
+            if (place.geometry.viewport) {
+                map.fitBounds(place.geometry.viewport);
+            } else {
+                map.setCenter(place.geometry.location);
+                map.setZoom(13);  // Why 17? Because it looks good.
+            }
+            placeMarkerAndPanTo(place.geometry.location, map);
+
+            var address = '';
+            if (place.address_components) {
+                address = [
+                    (place.address_components[0] && place.address_components[0].short_name || ''),
+                    (place.address_components[1] && place.address_components[1].short_name || ''),
+                    (place.address_components[2] && place.address_components[2].short_name || '')
+                ].join(' ');
+                villageComp.value = place.address_components[0] && place.address_components[0].short_name || '';
+                districtComp.value = place.address_components[1] && place.address_components[1].short_name || '';
+                addressComp.innerHTML = address;
+            }
+            latComp.value = place.geometry.location.lat()
+            ;
+            lngComp.value = place.geometry.location.lng();
+        })
+
+    }
+    function placeMarkerAndPanTo(latLng, map) {
+        if (typeof (marker) != 'undefined') {
+            marker.setMap(null);
+            marker.setVisible(false);
+        }
+        marker = new google.maps.Marker({
+            position: latLng,
+            map: map,
+            anchorPoint: new google.maps.Point(0, -29)
+        });
+        marker.setVisible(true);
+        map.panTo(latLng);
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJTW3yQkPo6fkeTMxbc6NbvfWYiYt5eAQ&callback=initMap&libraries=places"
+    async defer></script> {% endblock %}

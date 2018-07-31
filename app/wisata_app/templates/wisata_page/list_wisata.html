@@ -1,0 +1,107 @@
+{% extends 'base.html'%} {% block content %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Data Wisata</h1>
+                </div>
+                <!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item">
+                            <a href="{{url_for('dashboard_blueprint.dashboard_page')}}">Home</a>
+                        </li>
+                        <li class="breadcrumb-item active">Data Wisata</li>
+                    </ol>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header clearfix">
+                        <a href="{{url_for('wisata_blueprint.add_wisata')}}" class="btn btn-info">
+                            <i class="fa fa-plus"></i>
+                            Tambah Data
+                        </a>
+                        <form class="float-right">
+                            {{form_search.csrf_token()}}
+                            <div class="form-group has-feedback" style="width: 350px">
+                                {{form_search.search()}}
+                                <span class="fa fa-search form-control-feedback">
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nama</th>
+                                    <th>Deskripsi</th>
+                                    <th>Lokasi</th>
+                                    <th>Pengurus</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if data_wisata|length>0%}
+                                {% for wisata in data_wisata%}
+                                <tr>
+                                    <td>{{loop.index}}</td>
+                                    <td>{{wisata.name}}</td>
+                                    <td>{{wisata.desc}}</td>
+                                    <td>{{wisata.location.address if wisata.location else "-"}}</td>
+                                    <td>{{wisata.admin.name if wisata.admin else "-"}}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{url_for('wisata_blueprint.edit_wisata', wisata_id=wisata.id)}}" class="btn btn-info">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-danger">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <p>Tidak ada data yang ditampilkan...</p>
+                                    </td>
+                                </tr>
+                                {% endif%}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nama</th>
+                                    <th>Deskripsi</th>
+                                    <th>Lokasi</th>
+                                    <th>Pengurus</th>
+                                    <th>#</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
